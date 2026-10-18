@@ -43,7 +43,7 @@ The product is for the public, not a single-person workspace. The user explicitl
 All financial API routes must require a verified Clerk session. Derive identity from the server session and filter every read/update/delete by owner; never accept ownership from the request body.
 Keep ownerless demo/legacy records unassigned and hidden rather than assigning them to the first person who logs in.
 Do not add email reminder delivery, payments, external file storage, or future-vision features without a new request.
-Final hosting target is Vercel. If payments are ever requested, Stripe must be test mode only.
+The original hosting target was Vercel; the user approved direct Replit publishing for the current version. If payments are ever requested, Stripe must be test mode only.
 
 ## Gotchas
 
