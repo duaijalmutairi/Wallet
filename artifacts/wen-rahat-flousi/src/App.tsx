@@ -29,7 +29,7 @@ const formatMoney = (amount: number) =>
   new Intl.NumberFormat('ar-KW', { minimumFractionDigits: 3, maximumFractionDigits: 3 }).format(amount);
 
 const formatDate = (date: string) =>
-  new Intl.DateTimeFormat('ar-KW', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(`${date}T00:00:00`));
+  new Intl.DateTimeFormat('ar-KW', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(`${date.slice(0, 10)}T00:00:00`));
 
 function AppContent() {
   const queryClient = useQueryClient();

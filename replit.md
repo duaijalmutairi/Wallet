@@ -1,6 +1,6 @@
-# [Project name]
+# وين راحت فلوسي
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+Personal subscription, purchase-receipt, warranty-reminder, and potential-savings MVP for Kuwait.
 
 ## Run & Operate
 
@@ -8,21 +8,23 @@ _Replace the heading above with the project's name, and this line with one sente
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+- `pnpm --filter @workspace/wen-rahat-flousi run typecheck` — check the React client
+- Required secret: `MONGODB_URI` — MongoDB Atlas connection string; never put its value in source control
 
 ## Stack
 
 - pnpm workspaces, Node.js 24, TypeScript 5.9
 - API: Express 5
-- DB: PostgreSQL + Drizzle ORM
-- Validation: Zod (`zod/v4`), `drizzle-zod`
+- Product DB: MongoDB Atlas + Mongoose (the scaffold's PostgreSQL library is not used by this product)
+- Validation: generated Zod schemas
 - API codegen: Orval (from OpenAPI spec)
 - Build: esbuild (CJS bundle)
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- React/Vite client: `artifacts/wen-rahat-flousi/`
+- Express server: `artifacts/api-server/`
+- API contract: `lib/api-spec/openapi.yaml`
 
 ## Architecture decisions
 
@@ -34,7 +36,11 @@ _Describe the high-level user-facing capabilities of this app once they exist._
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+The user explicitly repeated: "التزم بالي أنا دازه".
+Build only subscription logging, renewal reminders, purchase receipt storage, warranty-expiry reminders, and the potential-savings calculator.
+Work in small runnable stages, starting with subscription CRUD from UI to MongoDB; visual polish comes later.
+Do not add login, email delivery, payments, external file storage, or future-vision features without a new request.
+Final hosting target is Vercel. If payments are ever requested, Stripe must be test mode only.
 
 ## Gotchas
 

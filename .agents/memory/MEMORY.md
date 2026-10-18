@@ -1,0 +1,1 @@
+- [Atlas data isolation](atlas-data-isolation.md) — the supplied Atlas database contains unrelated legacy subscription data; preserve it when extending this app.
