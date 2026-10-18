@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "وين راحت فلوسي"
+description = "تطبيق ويب يساعد المستخدم على تسجيل اشتراكاته الشهرية ومتابعة مواعيد تجديدها، ضمن النسخة الأولية من وين راحت فلوسي."
+version = "1.0.0"
+id = "artifacts/wen-rahat-flousi"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24413
+
+[services.development]
+run = "pnpm --filter @workspace/wen-rahat-flousi run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/wen-rahat-flousi", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/wen-rahat-flousi/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24413"
+BASE_PATH = "/"

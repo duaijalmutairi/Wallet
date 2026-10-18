@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: subscriptions
+    description: Subscription records
 paths:
   /healthz:
     get:
@@ -24,6 +26,109 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /subscriptions:
+    get:
+      operationId: listSubscriptions
+      tags: [subscriptions]
+      summary: List subscriptions
+      responses:
+        "200":
+          description: Subscription list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Subscription"
+    post:
+      operationId: createSubscription
+      tags: [subscriptions]
+      summary: Add a subscription
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubscriptionInput"
+      responses:
+        "201":
+          description: Subscription created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Subscription"
+        "400":
+          description: Invalid subscription details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /subscriptions/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      operationId: getSubscription
+      tags: [subscriptions]
+      summary: Get a subscription
+      responses:
+        "200":
+          description: Subscription
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Subscription"
+        "404":
+          description: Subscription not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    patch:
+      operationId: updateSubscription
+      tags: [subscriptions]
+      summary: Update a subscription
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubscriptionUpdate"
+      responses:
+        "200":
+          description: Subscription updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Subscription"
+        "400":
+          description: Invalid subscription details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Subscription not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      operationId: deleteSubscription
+      tags: [subscriptions]
+      summary: Delete a subscription
+      responses:
+        "204":
+          description: Subscription deleted
+        "404":
+          description: Subscription not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +138,78 @@ components:
           type: string
       required:
         - status
+    Subscription:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        amount:
+          type: number
+        billingCycle:
+          type: string
+          enum: [monthly, yearly]
+        renewalDate:
+          type: string
+          format: date
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - amount
+        - billingCycle
+        - renewalDate
+        - createdAt
+        - updatedAt
+    SubscriptionInput:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        amount:
+          type: number
+          exclusiveMinimum: 0
+        billingCycle:
+          type: string
+          enum: [monthly, yearly]
+        renewalDate:
+          type: string
+          format: date
+      required:
+        - name
+        - amount
+        - billingCycle
+        - renewalDate
+    SubscriptionUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        amount:
+          type: number
+          exclusiveMinimum: 0
+        billingCycle:
+          type: string
+          enum: [monthly, yearly]
+        renewalDate:
+          type: string
+          format: date
+      minProperties: 1
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
 
