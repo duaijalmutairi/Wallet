@@ -3,12 +3,12 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Private account-scoped subscriptions, purchases and receipts. All records are filtered by the verified Clerk user. Unowned legacy records are preserved but never claimed automatically. Other users' IDs return 404.
+security:
+  - ClerkSession: []
 servers:
   - url: /api
     description: Base API path
-security:
-  - clerkSession: []
 tags:
   - name: health
     description: Health operations
@@ -17,8 +17,8 @@ tags:
 paths:
   /healthz:
     get:
-      security: []
       operationId: healthCheck
+      security: []
       tags: [health]
       summary: Health check
       description: Returns server health status
@@ -35,6 +35,8 @@ paths:
       tags: [subscriptions]
       summary: List subscriptions
       responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
         "200":
           description: Subscription list
           content:
@@ -54,6 +56,8 @@ paths:
             schema:
               $ref: "#/components/schemas/SubscriptionInput"
       responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
         "201":
           description: Subscription created
           content:
@@ -78,6 +82,8 @@ paths:
       tags: [subscriptions]
       summary: Get a subscription
       responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
         "200":
           description: Subscription
           content:
@@ -101,6 +107,8 @@ paths:
             schema:
               $ref: "#/components/schemas/SubscriptionUpdate"
       responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
         "200":
           description: Subscription updated
           content:
@@ -124,6 +132,8 @@ paths:
       tags: [subscriptions]
       summary: Delete a subscription
       responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
         "204":
           description: Subscription deleted
         "404":
@@ -132,13 +142,251 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /purchases:
+    get:
+      operationId: listPurchases
+      tags: [purchases]
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Purchases, with warranty status calculated using the current Kuwait date
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Purchase"
+    post:
+      operationId: createPurchase
+      tags: [purchases]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PurchaseInput"
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Purchase"
+        "400":
+          $ref: "#/components/responses/InvalidPurchase"
+  /purchases/{id}:
+    parameters:
+      - $ref: "#/components/parameters/PurchaseId"
+    put:
+      operationId: updatePurchase
+      tags: [purchases]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PurchaseInput"
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Updated, receipt retained
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Purchase"
+        "400":
+          $ref: "#/components/responses/InvalidPurchase"
+        "404":
+          $ref: "#/components/responses/PurchaseNotFound"
+    delete:
+      operationId: deletePurchase
+      tags: [purchases]
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "204":
+          description: Purchase and attached receipt deleted
+        "404":
+          $ref: "#/components/responses/PurchaseNotFound"
+  /purchases/{id}/receipt:
+    parameters:
+      - $ref: "#/components/parameters/PurchaseId"
+    post:
+      operationId: uploadPurchaseReceipt
+      tags: [purchases]
+      description: Upload or replace a PDF, JPEG, or PNG receipt, maximum 10 MiB. The previous receipt is retained if upload fails.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/ReceiptUpload"
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Receipt saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Purchase"
+        "400":
+          $ref: "#/components/responses/InvalidPurchase"
+        "413":
+          description: File exceeds 10 MiB
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "415":
+          description: Unsupported file type or content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          $ref: "#/components/responses/PurchaseNotFound"
+        "409":
+          description: Receipt changed concurrently; refresh and retry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    get:
+      operationId: downloadPurchaseReceipt
+      tags: [purchases]
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Receipt file download
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        "404":
+          $ref: "#/components/responses/PurchaseNotFound"
+    delete:
+      operationId: deletePurchaseReceipt
+      tags: [purchases]
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Receipt removed, purchase retained
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Purchase"
+        "404":
+          $ref: "#/components/responses/PurchaseNotFound"
 components:
   securitySchemes:
-    clerkSession:
+    ClerkSession:
       type: apiKey
       in: cookie
       name: __session
+      description: Verified Clerk session. Ownership is assigned on the server, never from request input.
+  parameters:
+    PurchaseId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    Unauthorized:
+      description: Sign in required
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    InvalidPurchase:
+      description: Invalid purchase details or upload
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    PurchaseNotFound:
+      description: Purchase or receipt not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
   schemas:
+    PurchaseInput:
+      type: object
+      required: [name, amount, purchaseDate, warrantyEndDate, warrantyReminderDays]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        store:
+          type: string
+          maxLength: 100
+        amount:
+          type: number
+          exclusiveMinimum: 0
+        purchaseDate:
+          type: string
+          format: date
+        warrantyEndDate:
+          type: [string, "null"]
+          format: date
+        warrantyReminderDays:
+          type: integer
+          minimum: 0
+          maximum: 365
+          description: Alert this many calendar days before expiry, defaults to 30 in the UI
+        notes:
+          type: string
+          maxLength: 2000
+    ReceiptUpload:
+      type: object
+      required: [file]
+      properties:
+        file:
+          type: string
+          format: binary
+    Receipt:
+      type: object
+      required: [filename, contentType, size]
+      properties:
+        filename:
+          type: string
+        contentType:
+          type: string
+        size:
+          type: integer
+    Purchase:
+      allOf:
+        - $ref: "#/components/schemas/PurchaseInput"
+        - type: object
+          required: [id, receipt, warrantyStatus, warrantyDaysRemaining, createdAt, updatedAt]
+          properties:
+            id:
+              type: string
+            receipt:
+              oneOf:
+                - $ref: "#/components/schemas/Receipt"
+                - type: "null"
+            warrantyStatus:
+              type: string
+              enum: [none, active, expiring, expired]
+            warrantyDaysRemaining:
+              type: [integer, "null"]
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time
     HealthStatus:
       type: object
       properties:

@@ -17,14 +17,18 @@ function ClerkQueryClientCacheInvalidator() {
   const { addListener } = useClerk();
   const queryClient = useQueryClient();
   const prevUserIdRef = useRef<string | null | undefined>(undefined);
+  const prevSessionIdRef = useRef<string | null | undefined>(undefined);
 
   useEffect(() => {
-    const unsubscribe = addListener(({ user }) => {
+    const unsubscribe = addListener(({ user, session }) => {
       const userId = user?.id ?? null;
-      if (prevUserIdRef.current !== undefined && prevUserIdRef.current !== userId) {
+      const sessionId = session?.id ?? null;
+      if ((prevUserIdRef.current !== undefined && prevUserIdRef.current !== userId) ||
+          (prevSessionIdRef.current !== undefined && prevSessionIdRef.current !== sessionId)) {
         queryClient.clear();
       }
       prevUserIdRef.current = userId;
+      prevSessionIdRef.current = sessionId;
     });
     return unsubscribe;
   }, [addListener, queryClient]);
@@ -44,11 +48,11 @@ function HomeRedirect() {
 }
 
 function UserPortal() {
-  const { isLoaded } = useAuth();
+  const { isLoaded, userId } = useAuth();
   if (!isLoaded) return <FullLoader label="جاري تحميل حسابك" />;
   return (
     <>
-      <Show when="signed-in"><Portal /></Show>
+      <Show when="signed-in"><Portal key={userId} /></Show>
       <Show when="signed-out"><Redirect to="/" /></Show>
     </>
   );
