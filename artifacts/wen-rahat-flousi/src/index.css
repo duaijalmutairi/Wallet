@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
+@layer theme, base, clerk, components, utilities;
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @plugin "@tailwindcss/typography";
@@ -23,6 +24,12 @@
   --color-accent-foreground: hsl(var(--accent-foreground));
   --color-destructive: hsl(var(--destructive));
   --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-success: hsl(var(--success));
+  --color-success-foreground: hsl(var(--success-foreground));
+  --color-hero: hsl(var(--hero));
+  --color-hero-foreground: hsl(var(--hero-foreground));
+  --color-hero-muted: hsl(var(--hero-muted));
+  --color-surface: hsl(var(--surface));
   --font-sans: var(--app-font-sans);
   --font-mono: var(--app-font-mono);
   --radius-sm: calc(var(--radius) - 4px);
@@ -49,6 +56,13 @@
   --destructive: 4 61% 48%;
   --destructive-foreground: 0 0% 100%;
   --ring: 174 42% 27%;
+  --success: 150 30% 32%;
+  --success-foreground: 150 30% 94%;
+  --hero: 174 42% 27%;
+  --hero-foreground: 45 50% 96%;
+  --hero-muted: 140 18% 84%;
+  --surface: 42 60% 99%;
+  --glow: 39 58% 88% / .54;
   --radius: 1rem;
   --app-font-sans: 'IBM Plex Sans Arabic', 'Manrope', sans-serif;
   --app-font-mono: 'Manrope', monospace;
@@ -72,6 +86,13 @@
   --destructive: 4 56% 58%;
   --destructive-foreground: 0 0% 100%;
   --ring: 171 38% 58%;
+  --success: 150 36% 62%;
+  --success-foreground: 150 30% 12%;
+  --hero: 176 34% 20%;
+  --hero-foreground: 42 37% 94%;
+  --hero-muted: 150 14% 72%;
+  --surface: 178 26% 10%;
+  --glow: 174 40% 26% / .45;
 }
 
 * { box-sizing: border-box; }
@@ -82,7 +103,7 @@ body {
   min-height: 100dvh;
   color: hsl(var(--foreground));
   background:
-    radial-gradient(ellipse at 90% 0%, hsl(39 58% 88% / .54), transparent 34rem),
+    radial-gradient(ellipse at 90% 0%, hsl(var(--glow)), transparent 34rem),
     hsl(var(--background));
   font-family: var(--app-font-sans);
   -webkit-font-smoothing: antialiased;
@@ -95,8 +116,8 @@ button { cursor: pointer; }
 .page-shell { width: min(1120px, calc(100% - 64px)); margin-inline: auto; }
 .header-line { border-bottom: 1px solid hsl(var(--border) / .7); }
 .hero-panel {
-  background: hsl(174 42% 27%);
-  color: hsl(45 50% 96%);
+  background: hsl(var(--hero));
+  color: hsl(var(--hero-foreground));
   position: relative;
   overflow: hidden;
   isolation: isolate;
@@ -105,7 +126,7 @@ button { cursor: pointer; }
   content: '';
   position: absolute;
   z-index: -1;
-  border: 1px solid hsl(45 50% 96% / .14);
+  border: 1px solid hsl(var(--hero-foreground) / .14);
   border-radius: 50%;
   pointer-events: none;
 }
@@ -116,7 +137,7 @@ button { cursor: pointer; }
 .delay-two { animation-delay: .14s; }
 @keyframes rise-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 .subscription-row { transition: background-color .18s ease, transform .18s ease; }
-.subscription-row:hover { background: hsl(43 36% 94%); }
+.subscription-row:hover { background: hsl(var(--muted) / .6); }
 .icon-button { transition: background-color .16s ease, color .16s ease, transform .16s ease; }
 .icon-button:hover { transform: translateY(-1px); }
 .modal-backdrop { animation: fade-in .18s ease-out both; }
@@ -127,3 +148,11 @@ button { cursor: pointer; }
 @media (max-width: 767px) {
   .page-shell { width: min(100% - 32px, 600px); }
 }
+
+html.dark { color-scheme: dark; }
+.dark input[type='date']::-webkit-calendar-picker-indicator { filter: invert(.85); }
+.cl-formFieldInput::placeholder { color: hsl(var(--muted-foreground)); opacity: 1; }
+.cl-formButtonPrimary:hover { filter: brightness(1.08); }
+.cl-socialButtonsBlockButton:hover { background: hsl(var(--muted)); }
+.cl-footerActionLink:hover { text-decoration: underline; }
+.ledger-lines { background-image: repeating-linear-gradient(0deg, hsl(var(--border) / .55) 0 1px, transparent 1px 34px); }

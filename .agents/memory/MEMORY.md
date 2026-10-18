@@ -1,1 +1,2 @@
 - [Atlas data isolation](atlas-data-isolation.md) — the supplied Atlas database contains unrelated legacy subscription data; preserve it when extending this app.
+- [React optimizer cache](react-optimizer-cache.md) — stale Vite bundles can mix renderer versions after a Clerk-required React patch upgrade.

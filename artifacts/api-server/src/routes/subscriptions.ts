@@ -38,7 +38,7 @@ function toSubscriptionResponse(
 
 router.get("/subscriptions", async (req, res): Promise<void> => {
   await connectMongo();
-  const records = await SubscriptionModel.find()
+  const records = await SubscriptionModel.find({ ownerId: res.locals.ownerId })
     .sort({ renewalDate: 1, name: 1 })
     .exec();
   const response = ListSubscriptionsResponse.parse(
@@ -56,7 +56,10 @@ router.post("/subscriptions", async (req, res): Promise<void> => {
   }
 
   await connectMongo();
-  const record = await SubscriptionModel.create(parsed.data);
+  const record = await SubscriptionModel.create({
+    ...parsed.data,
+    ownerId: res.locals.ownerId,
+  });
   res
     .status(201)
     .json(CreateSubscriptionResponse.parse(toSubscriptionResponse(record)));
@@ -70,7 +73,10 @@ router.get("/subscriptions/:id", async (req, res): Promise<void> => {
   }
 
   await connectMongo();
-  const record = await SubscriptionModel.findById(params.data.id).exec();
+  const record = await SubscriptionModel.findOne({
+    _id: params.data.id,
+    ownerId: res.locals.ownerId,
+  }).exec();
   if (!record) {
     res.status(404).json({ error: "Subscription not found" });
     return;
@@ -98,10 +104,10 @@ router.patch("/subscriptions/:id", async (req, res): Promise<void> => {
   }
 
   await connectMongo();
-  const record = await SubscriptionModel.findByIdAndUpdate(
-    params.data.id,
-    parsed.data,
-    { new: true, runValidators: true },
+  const record = await SubscriptionModel.findOneAndUpdate(
+    { _id: params.data.id, ownerId: res.locals.ownerId },
+    { $set: parsed.data },
+    { returnDocument: "after", runValidators: true },
   ).exec();
   if (!record) {
     res.status(404).json({ error: "Subscription not found" });
@@ -119,7 +125,10 @@ router.delete("/subscriptions/:id", async (req, res): Promise<void> => {
   }
 
   await connectMongo();
-  const record = await SubscriptionModel.findByIdAndDelete(params.data.id).exec();
+  const record = await SubscriptionModel.findOneAndDelete({
+    _id: params.data.id,
+    ownerId: res.locals.ownerId,
+  }).exec();
   if (!record) {
     res.status(404).json({ error: "Subscription not found" });
     return;

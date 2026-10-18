@@ -39,7 +39,10 @@ _Describe the high-level user-facing capabilities of this app once they exist._
 The user explicitly repeated: "التزم بالي أنا دازه".
 Build only subscription logging, renewal reminders, purchase receipt storage, warranty-expiry reminders, and the potential-savings calculator.
 Work in small runnable stages, starting with subscription CRUD from UI to MongoDB; visual polish comes later.
-Do not add login, email delivery, payments, external file storage, or future-vision features without a new request.
+The product is for the public, not a single-person workspace. The user explicitly requested accounts, login, dark mode, and private per-user MongoDB data.
+All financial API routes must require a verified Clerk session. Derive identity from the server session and filter every read/update/delete by owner; never accept ownership from the request body.
+Keep ownerless demo/legacy records unassigned and hidden rather than assigning them to the first person who logs in.
+Do not add email reminder delivery, payments, external file storage, or future-vision features without a new request.
 Final hosting target is Vercel. If payments are ever requested, Stripe must be test mode only.
 
 ## Gotchas
