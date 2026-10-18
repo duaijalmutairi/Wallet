@@ -11,7 +11,7 @@ const subscriptionSchema = new Schema(
     },
     renewalDate: { type: Date, required: true },
   },
-  { timestamps: true },
+  { timestamps: true, collection: "wen_rahat_subscriptions" },
 );
 
 export type SubscriptionRecord = InferSchemaType<typeof subscriptionSchema>;
